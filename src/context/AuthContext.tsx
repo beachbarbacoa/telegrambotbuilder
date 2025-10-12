@@ -16,14 +16,23 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
+    // Check current session on load
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      setIsLoading(false);
+    };
+
+    checkSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setUser(session?.user || null);
-        setIsLoading(false);
       }
     );
 
-    return () => authListener.subscription.unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {

@@ -27,9 +27,11 @@ const App = () => (
             <Route path="/auth/login" element={<Login />} />
             
             {/* Protected Dashboard Routes */}
-            <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              {/* Add more dashboard routes here */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<DashboardLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                {/* Add more dashboard routes here */}
+              </Route>
             </Route>
             
             <Route path="*" element={<NotFound />} />
