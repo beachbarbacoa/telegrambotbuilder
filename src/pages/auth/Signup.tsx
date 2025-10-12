@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +21,7 @@ const Signup = () => {
     try {
       // Supabase signup logic will go here
       showSuccess("Account created! Check your email for verification");
-      router.push("/auth/verify-email");
+      navigate("/auth/verify-email");
     } catch (error) {
       showError("Signup failed. Please try again");
     } finally {
@@ -61,7 +61,7 @@ const Signup = () => {
               {loading ? "Creating account..." : "Sign Up"}
             </Button>
             <div className="text-center mt-4">
-              <Button variant="link" onClick={() => router.push("/auth/login")}>
+              <Button variant="link" onClick={() => navigate("/auth/login")}>
                 Already have an account? Log in
               </Button>
             </div>

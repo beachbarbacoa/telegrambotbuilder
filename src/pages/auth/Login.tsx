@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +20,7 @@ const Login = () => {
     
     try {
       // Supabase login logic will go here
-      router.push("/dashboard");
+      navigate("/dashboard");
     } catch (error) {
       showError("Invalid credentials");
     } finally {
@@ -60,7 +60,7 @@ const Login = () => {
               {loading ? "Logging in..." : "Login"}
             </Button>
             <div className="text-center mt-4">
-              <Button variant="link" onClick={() => router.push("/auth/forgot-password")}>
+              <Button variant="link" onClick={() => navigate("/auth/forgot-password")}>
                 Forgot password?
               </Button>
             </div>
