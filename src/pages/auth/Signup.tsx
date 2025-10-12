@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { showError, showSuccess } from "@/utils/toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -19,7 +20,16 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      // Supabase signup logic will go here
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        showError(error.message);
+        return;
+      }
+
       showSuccess("Account created! Check your email for verification");
       navigate("/auth/verify-email");
     } catch (error) {
