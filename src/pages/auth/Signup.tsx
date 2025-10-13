@@ -10,19 +10,30 @@ import { showError, showSuccess } from "@/utils/toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    restaurantName: "",
+  });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
+      // Sign up the user
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
       });
 
       if (error) {
@@ -30,8 +41,30 @@ const Signup = () => {
         return;
       }
 
+      // Create restaurant profile
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('restaurants')
+          .insert({
+            id: data.user.id,
+            name: formData.restaurantName,
+            email: formData.email,
+            subscription_plan: 'monthly_50', // Default plan
+            payment_method: 'cash_pickup', // Default payment method
+            status: 'active',
+            order_limit: 50,
+            orders_used: 0,
+          });
+
+        if (profileError) {
+          showError("Account created but profile setup failed. Please contact support.");
+          return;
+        }
+      }
+
       showSuccess("Account created! Check your email for verification");
-      navigate("/auth/verify-email");
+      // Navigate to login page instead of verify-email page
+      navigate("/auth/login");
     } catch (error) {
       showError("Signup failed. Please try again");
     } finally {
@@ -48,12 +81,21 @@ const Signup = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <Label htmlFor="restaurantName">Restaurant Name</Label>
+              <Input
+                id="restaurantName"
+                value={formData.restaurantName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -62,8 +104,8 @@ const Signup = () => {
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleChange}
                 required
               />
             </div>
