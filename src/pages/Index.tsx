@@ -23,6 +23,15 @@ const Index = () => {
             </Link>
           </Button>
         </div>
+        
+        {/* Test link for debugging - remove in production */}
+        <div className="mt-4">
+          <Button asChild variant="link" size="sm">
+            <Link to="/auth/test">
+              Connection Test (Debug)
+            </Link>
+          </Button>
+        </div>
       </div>
       
       <div className="max-w-4xl mx-auto px-4">
