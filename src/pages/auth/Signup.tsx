@@ -37,7 +37,7 @@ const Signup = () => {
       });
 
       if (error) {
-        showError(error.message);
+        showError(`Signup error: ${error.message}`);
         return;
       }
 
@@ -57,16 +57,21 @@ const Signup = () => {
           });
 
         if (profileError) {
-          showError("Account created but profile setup failed. Please contact support.");
+          // Log the detailed error for debugging
+          console.error("Profile creation error:", profileError);
+          showError(`Account created but profile setup failed: ${profileError.message}. Please contact support.`);
           return;
         }
       }
 
-      showSuccess("Account created! Check your email for verification");
-      // Navigate to login page instead of verify-email page
-      navigate("/auth/login");
+      showSuccess("Account created successfully! Redirecting to login...");
+      // Small delay to show success message
+      setTimeout(() => {
+        navigate("/auth/login");
+      }, 2000);
     } catch (error) {
-      showError("Signup failed. Please try again");
+      console.error("Signup error:", error);
+      showError(`Signup failed: ${error.message}. Please try again.`);
     } finally {
       setLoading(false);
     }

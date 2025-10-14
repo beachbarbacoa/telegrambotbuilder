@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 const TestSupabase = () => {
   const [connectionStatus, setConnectionStatus] = useState("Checking...");
   const [error, setError] = useState("");
+  const [tableStatus, setTableStatus] = useState("Checking...");
+  const [tableError, setTableError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,17 +25,24 @@ const TestSupabase = () => {
           return;
         }
         
-        // Test database connection by trying to fetch restaurants table info
-        const { data, error } = await supabase
-          .from('restaurants')
-          .select('id')
-          .limit(1);
-          
-        if (error) {
-          setConnectionStatus("Failed");
-          setError(`Database error: ${error.message}`);
-        } else {
-          setConnectionStatus("Success");
+        setConnectionStatus("Success");
+        
+        // Test if restaurants table exists and has correct structure
+        try {
+          const { data, error } = await supabase
+            .from('restaurants')
+            .select('id')
+            .limit(1);
+            
+          if (error) {
+            setTableStatus("Failed");
+            setTableError(`Database error: ${error.message}`);
+          } else {
+            setTableStatus("Success");
+          }
+        } catch (tableErr) {
+          setTableStatus("Failed");
+          setTableError(`Table error: ${tableErr.message}`);
         }
       } catch (err) {
         setConnectionStatus("Failed");
@@ -63,6 +72,20 @@ const TestSupabase = () => {
               <div>
                 <h3 className="font-medium">Error:</h3>
                 <p className="text-red-600">{error}</p>
+              </div>
+            )}
+            
+            <div>
+              <h3 className="font-medium">Restaurants Table Status:</h3>
+              <p className={tableStatus === "Success" ? "text-green-600" : "text-red-600"}>
+                {tableStatus}
+              </p>
+            </div>
+            
+            {tableError && (
+              <div>
+                <h3 className="font-medium">Table Error:</h3>
+                <p className="text-red-600">{tableError}</p>
               </div>
             )}
             
