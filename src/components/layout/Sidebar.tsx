@@ -1,13 +1,15 @@
 "use client";
 
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Utensils, CreditCard, Settings } from "lucide-react";
+import { LayoutDashboard, Utensils, CreditCard, Settings, User, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
   { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { name: "Profile", path: "/dashboard/profile", icon: User },
   { name: "Menu", path: "/dashboard/menu", icon: Utensils },
   { name: "Billing", path: "/dashboard/billing", icon: CreditCard },
+  { name: "Payments", path: "/dashboard/payments", icon: DollarSign },
   { name: "Settings", path: "/dashboard/settings", icon: Settings },
 ];
 
