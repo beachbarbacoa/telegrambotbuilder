@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { supabase } from "./_utils/supabase";
+import { supabase } from "./_utils/supabase.js";
 import { Buffer } from 'buffer';
 
 export const config = {
