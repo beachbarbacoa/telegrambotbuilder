@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import TestSupabase from "./pages/auth/TestSupabase";
+import TestFrontend from "./test-frontend";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Profile from "./pages/dashboard/Profile";
@@ -38,6 +39,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/test" element={<TestFrontend />} />
               <Route path="/auth/signup" element={<Signup />} />
               <Route path="/auth/login" element={<Login />} />
               <Route path="/auth/test" element={<TestSupabase />} />
