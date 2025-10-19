@@ -71,8 +71,8 @@ const Login = () => {
               {loading ? "Logging in..." : "Login"}
             </Button>
             <div className="text-center mt-4">
-              <Button variant="link" onClick={() => navigate("/auth/forgot-password")}>
-                Forgot password?
+              <Button variant="link" onClick={() => navigate("/auth/signup")}>
+                Don't have an account? Sign up
               </Button>
             </div>
           </form>

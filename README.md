@@ -85,7 +85,7 @@ A fully automated SaaS platform that allows restaurants to create their own Tele
 - Node.js (v16 or higher)
 - pnpm (package manager)
 - Supabase account
-- Stripe account
+- Stripe account (optional for initial testing)
 
 ### Installation
 
@@ -106,9 +106,9 @@ Create a `.env` file in the root directory with the following variables:
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_KEY=your_supabase_service_key
-VITE_STRIPE_PUBLIC_KEY=your_stripe_publishable_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+# VITE_STRIPE_PUBLIC_KEY=your_stripe_publishable_key (optional for testing)
+# STRIPE_SECRET_KEY=your_stripe_secret_key (optional for testing)
+# STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret (optional for testing)
 VITE_APP_URL=https://your-app-url.com
 ```
 
@@ -124,13 +124,31 @@ pnpm dev
 
 ### Frontend (Vercel)
 1. Connect your GitHub repository to Vercel
-2. Set the environment variables in Vercel project settings
+2. Set the environment variables in Vercel project settings (Stripe variables are optional for initial testing)
 3. Deploy!
 
 ### Backend (Supabase)
 1. Deploy the database schema and functions to Supabase
 2. Configure authentication settings
-3. Set up Stripe webhooks
+3. Set up Stripe webhooks (optional for initial testing)
+
+## Recent Fixes
+
+### Blank Page Issue Resolution
+The application was experiencing blank pages on all routes. This issue has been resolved by:
+
+1. **Fixed Login Component**: Removed reference to non-existent `/auth/forgot-password` route
+2. **Restored Complete App Component**: Replaced minimal App component with full version including all routes
+3. **Verified Build Process**: Confirmed successful build with `npm run build`
+4. **Tested Local Preview**: Verified application runs correctly with `npm run preview`
+
+For detailed troubleshooting steps, refer to `TROUBLESHOOTING.md`.
+
+## Vercel Deployment Troubleshooting
+
+If you're still experiencing issues with your Vercel deployment at https://telegrambotbuilder.vercel.app/, please refer to `VERCEL_TROUBLESHOOTING.md` for specific steps to diagnose and fix deployment issues.
+
+Note: Stripe integration is optional for initial testing. The application has been modified to work without Stripe for basic functionality testing.
 
 ## Environment Variables
 

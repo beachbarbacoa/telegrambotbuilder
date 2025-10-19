@@ -1,105 +1,153 @@
 # Troubleshooting Guide
 
-## Signup Issue: "Account created but profile setup failed"
+## Blank Page Issue Resolution
 
-This error occurs when the user authentication account is created successfully in Supabase, but there's an issue with creating the restaurant profile in the database.
+### Problem
+The application was loading blank pages for all routes including the main page, signup, and login pages.
 
-### Common Causes and Solutions
+### Root Causes Identified
+1. Reference to non-existent route in Login component (`/auth/forgot-password`)
+2. Incomplete App component with missing routes
+3. Potential Vercel deployment configuration issues
 
-#### 1. Database Tables Not Created
-**Symptoms**: Profile setup fails with database-related errors
-**Solution**: 
-1. Go to your Supabase project dashboard
-2. Navigate to the SQL editor
-3. Run the database migration script from `DATABASE_MIGRATION.sql` or the setup script from `scripts/setup-database.sql`
+### Fixes Applied
 
-#### 2. Missing or Incorrect Environment Variables
-**Symptoms**: Connection errors or authentication failures
-**Solution**:
-1. Go to your Vercel project dashboard
-2. Navigate to Settings > Environment Variables
-3. Verify these variables are set correctly:
-   - `VITE_SUPABASE_URL` - Your Supabase project URL
-   - `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
-   - `SUPABASE_SERVICE_KEY` - Your Supabase service key
-4. Redeploy your application after making changes
+#### 1. Fixed Login Component
+Removed the "Forgot password?" link that was referencing a non-existent route:
+```typescript
+// Removed this line:
+// <Button variant="link" onClick={() => navigate("/auth/forgot-password")}>
+//   Forgot password?
+// </Button>
+```
 
-#### 3. Database Permissions Issues
-**Symptoms**: Access denied or permission errors
-**Solution**:
-1. In Supabase, go to Authentication > Policies
-2. Ensure the restaurants table has appropriate RLS (Row Level Security) policies
-3. Check that your Supabase service key has the necessary permissions
+#### 2. Restored Complete App Component
+Replaced the minimal App component with the full version that includes all necessary routes:
+- Main routes (/, /test, /auth/signup, /auth/login, /auth/test)
+- Admin routes (/admin/* with sub-routes)
+- Dashboard routes (/dashboard/* with protected sub-routes)
+- Proper error handling with NotFound component
 
-#### 4. Table Structure Mismatch
-**Symptoms**: Column not found or data type errors
-**Solution**:
-1. Run the verification script from `scripts/verify-database.js` in your Supabase SQL editor
-2. Compare the output with the expected schema in `DATABASE_SCHEMA.md`
-3. Update your database schema if needed
+#### 3. Verified Build Process
+Confirmed that `npm run build` completes successfully and generates the dist folder with all necessary assets.
 
-### Diagnostic Steps
+#### 4. Tested Local Preview
+Verified that `npm run preview` serves the application correctly at http://localhost:4173/
 
-#### Step 1: Test Database Connection
-1. Visit your deployed site
-2. Click on "Connection Test (Debug)" on the main page
-3. Check the results for connection and table status
+### Current Issue: Vercel Deployment
 
-#### Step 2: Check Browser Console
-1. Open your browser's developer tools (F12)
-2. Go to the Console tab
-3. Try to signup again
-4. Look for any error messages
+The application builds correctly locally but may still have deployment issues on Vercel. Here are steps to troubleshoot:
 
-#### Step 3: Check Supabase Logs
-1. In your Supabase dashboard, go to Logs
-2. Look for any errors related to database operations
-3. Check both authentication and database logs
+#### 1. Check Vercel Project Settings
+- Ensure the build command is set to `npm run build`
+- Ensure the output directory is set to `dist`
+- Verify all environment variables are set in Vercel project settings
 
-#### Step 4: Manual Database Verification
-1. In Supabase SQL editor, run:
-   ```sql
-   SELECT * FROM restaurants LIMIT 5;
+#### 2. Manual Deployment Through Vercel Dashboard
+If CLI deployment is not working:
+1. Push your code to GitHub
+2. Connect your GitHub repository to Vercel through the dashboard
+3. Let Vercel automatically deploy on push
+
+#### 3. Check Browser Console
+When visiting the deployed site:
+1. Open browser developer tools (F12)
+2. Check the Console tab for JavaScript errors
+3. Check the Network tab to see if assets are loading correctly
+
+#### 4. Verify Environment Variables
+Ensure these environment variables are set in Vercel:
+- VITE_SUPABASE_URL
+- VITE_SUPABASE_ANON_KEY
+- VITE_STRIPE_PUBLIC_KEY
+
+### Deployment Instructions
+
+1. **Login to Vercel** (if not already logged in):
+   ```bash
+   npx vercel login
    ```
-2. If this fails, the restaurants table may not exist or have permission issues
+   Follow the prompts to authenticate with your Vercel account.
 
-### Quick Fix Script
+2. **Deploy to Vercel**:
+   ```bash
+   npx vercel --prod --yes
+   ```
 
-If you're still having issues, try running this in your Supabase SQL editor:
+3. **Alternative Deployment Method**:
+   If you have the Vercel project already set up, you can also deploy by:
+   - Pushing your changes to GitHub
+   - Connecting your GitHub repository to Vercel
+   - Letting Vercel automatically deploy on push
 
-```sql
--- Check if restaurants table exists
-SELECT EXISTS (
-   SELECT FROM information_schema.tables 
-   WHERE table_schema = 'public' 
-   AND table_name = 'restaurants'
-);
+### Additional Notes
 
--- If it doesn't exist, run the setup script from scripts/setup-database.sql
-```
+- The vercel.json file is correctly configured for SPA routing with rewrites
+- All environment variables should be set in the Vercel project settings
+- The build process should complete without errors
 
-### Need More Help?
+## Common Issues and Solutions
 
-If you're still experiencing issues:
+### 1. Build Errors
+If you encounter build errors:
+- Check that all dependencies are installed: `npm install`
+- Verify TypeScript compilation: `npm run build`
+- Check for any syntax errors in the code
 
-1. Check the browser console for detailed error messages
-2. Verify all environment variables are correctly set in Vercel
-3. Ensure the database migration has been run in Supabase
-4. Contact support with the specific error message you're seeing
+### 2. Routing Issues
+If routes are not working correctly:
+- Ensure all routes are properly defined in App.tsx
+- Check that the vercel.json file has the correct rewrite rules
+- Verify that all components referenced in routes exist
 
-### Common Error Messages and Solutions
+### 3. Environment Variables
+If the application is not connecting to Supabase:
+- Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in Vercel environment variables
+- Check that the Supabase project is properly configured
 
-#### "relation 'restaurants' does not exist"
-**Solution**: Run the database migration script
+## Testing
+After deployment:
+1. Visit the main page and verify it loads correctly
+2. Try navigating to /auth/signup and /auth/login
+3. Test the signup process with a new account
+4. Test the login process with an existing account
 
-#### "duplicate key value violates unique constraint"
-**Solution**: This might happen if trying to insert a duplicate email. The system should handle this gracefully, but you can manually delete test records if needed:
-```sql
-DELETE FROM restaurants WHERE email = 'test@example.com';
-```
+## Vercel CLI Authentication Issues
 
-#### "null value in column 'id' violates not-null constraint"
-**Solution**: This shouldn't happen with the current code, but ensure you're using a recent version of the signup component.
+If you're experiencing authentication issues with Vercel CLI:
 
-#### "permission denied for table restaurants"
-**Solution**: Check your Supabase RLS policies and service key permissions.
+1. Try clearing Vercel credentials:
+   ```bash
+   npx vercel logout
+   ```
+
+2. Then login again:
+   ```bash
+   npx vercel login
+   ```
+
+3. If that doesn't work, manually create a token:
+   - Go to Vercel dashboard
+   - Go to Settings > Tokens
+   - Create a new token
+   - Use it with:
+     ```bash
+     npx vercel login --token=your_token_here
+     ```
+
+## Browser Debugging Steps
+
+If the deployed site shows a blank page:
+
+1. Open browser developer tools (F12)
+2. Check the Console tab for errors
+3. Check the Network tab to see if:
+   - index.html loads correctly
+   - JavaScript files load without 404 errors
+   - CSS files load correctly
+4. Check the Sources tab to see if JavaScript is executing
+
+Common issues:
+- 404 errors on JavaScript/CSS files (routing configuration issue)
+- JavaScript errors preventing app initialization
+- Missing environment variables causing runtime errors

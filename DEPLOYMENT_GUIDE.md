@@ -1,172 +1,174 @@
 # Deployment Guide
 
 ## Prerequisites
+- Node.js installed
+- Vercel account
+- Supabase account with project created
+- Stripe account (optional for initial testing)
 
-Before deploying the Telegram Restaurant Bot SaaS Platform, ensure you have:
+## Deployment Steps
 
-1. A Supabase account and project
-2. A Stripe account with API keys
-3. A Vercel account for frontend deployment
-4. A domain name (optional but recommended)
+### 1. Build the Application
+```bash
+npm run build
+```
 
-## Step 1: Set up Supabase
+### 2. Test Locally (Optional)
+```bash
+npm run preview
+```
 
-### 1.1 Create a Supabase Project
-1. Go to [supabase.com](https://supabase.com) and create a new project
-2. Note down your project URL and API keys
+### 3. Deploy to Vercel
 
-### 1.2 Apply Database Migrations
-1. In your Supabase project dashboard, go to the SQL editor
-2. Copy and run the contents of `DATABASE_MIGRATION.sql` - this creates all the necessary tables in the correct order
-3. After the tables are created, copy and run the contents of `DATABASE_FUNCTIONS.sql`
+#### Option A: Using Vercel CLI
+1. Install Vercel CLI (if not already installed):
+   ```bash
+   npm install -g vercel
+   ```
 
-### 1.3 Configure Authentication
-1. Go to Authentication > Settings in your Supabase dashboard
-2. Enable Email signup
-3. Configure email templates as needed
+2. Login to Vercel:
+   ```bash
+   vercel login
+   ```
 
-## Step 2: Set up Stripe
+3. Deploy the project:
+   ```bash
+   vercel --prod --yes
+   ```
 
-### 2.1 Create Stripe Account
-1. Go to [stripe.com](https://stripe.com) and create an account
-2. Complete the verification process
+#### Option B: Using GitHub Integration
+1. Push your code to a GitHub repository
+2. Go to your Vercel dashboard
+3. Click "New Project"
+4. Import your GitHub repository
+5. Configure the project settings:
+   - Framework: Vite
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
 
-### 2.2 Get API Keys
-1. Go to Developers > API keys
-2. Copy your publishable key and secret key
-3. Set up webhooks:
-   - Go to Developers > Webhooks
-   - Add endpoint URL: `https://your-domain.com/api/stripe-webhook`
-   - Select events: `checkout.session.completed`, `invoice.payment_succeeded`, `customer.subscription.deleted`
-   - Copy the webhook signing secret
+### 4. Configure Environment Variables
+In your Vercel project settings, add the following environment variables:
 
-## Step 3: Configure Environment Variables
-
-### 3.1 Frontend Environment Variables (Vercel)
-Set these in your Vercel project settings:
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
+```bash
+VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_STRIPE_PUBLIC_KEY=your_stripe_publishable_key
-VITE_APP_URL=https://your-domain.com
 ```
 
-### 3.2 Backend Environment Variables (Vercel)
-Set these in your Vercel project settings:
+Note: VITE_STRIPE_PUBLIC_KEY is optional for basic testing. The application has been modified to work without Stripe for initial testing.
 
-```env
-SUPABASE_SERVICE_KEY=your_supabase_service_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+### 5. Redeploy
+After adding environment variables, redeploy the application:
+```bash
+vercel --prod
 ```
 
-## Step 4: Deploy Frontend to Vercel
+## Troubleshooting Deployment Issues
 
-### 4.1 Connect Repository
-1. Go to [vercel.com](https://vercel.com) and create a new project
-2. Connect your GitHub repository
-3. Select the root directory
+### Blank Page After Deployment
 
-### 4.2 Configure Project
-1. Set the framework preset to "Vite"
-2. Set the build command to `pnpm build`
-3. Set the output directory to `dist`
-4. Add the environment variables from Step 3.1
+If you see a blank page after deployment, follow these steps:
 
-### 4.3 Deploy
-1. Click "Deploy"
-2. Wait for the deployment to complete
-3. Note the deployment URL
+1. **Check Browser Console**:
+   - Open Developer Tools (F12)
+   - Look for JavaScript errors in the Console tab
+   - Check the Network tab for 404 errors on assets
 
-## Step 5: Configure Telegram Bot Integration
+2. **Verify Vercel Configuration**:
+   - Check that Build Command is set to `npm run build`
+   - Check that Output Directory is set to `dist`
+   - Verify all environment variables are set
 
-### 5.1 Create BotFather Bot
-1. Open Telegram and search for @BotFather
-2. Start a chat and use the `/newbot` command
-3. Follow the instructions to create your platform bot
-4. Note the bot token
+3. **Test with a Simple HTML File**:
+   - Create a simple HTML file in the public directory
+   - Deploy and verify it loads correctly
+   - This confirms Vercel is serving files properly
 
-### 5.2 Set Webhook
-1. Use the Telegram Bot API to set your webhook:
+### Vercel CLI Authentication Issues
+
+If you're having trouble with `vercel login`:
+
+1. Try logging out and back in:
+   ```bash
+   vercel logout
+   vercel login
    ```
-   https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://your-domain.com/api/telegram-webhook
+
+2. If that doesn't work, create a token manually:
+   - Go to Vercel Dashboard > Settings > Tokens
+   - Create a new token
+   - Use it with:
+     ```bash
+     vercel login --token=your_token_here
+     ```
+
+### Build Failures
+
+If the build fails on Vercel:
+
+1. Check the build logs in Vercel dashboard
+2. Ensure all dependencies are in package.json
+3. Verify TypeScript compilation works locally with `npm run build`
+
+## Post-Deployment Verification
+
+1. Visit the main page and verify it loads correctly
+2. Test navigation to signup and login pages
+3. Try creating a new account
+4. Test logging in with the new account
+5. Verify that the dashboard loads after login
+
+## Adding Stripe Later
+
+To enable full payment functionality:
+
+1. Create a Stripe account
+2. Add these environment variables to Vercel:
+   ```bash
+   VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   ```
+3. Redeploy the application
+
+## Additional Notes
+
+- The application uses React Router for client-side routing
+- The vercel.json file is configured for SPA routing
+- All API routes are handled by the Vercel serverless functions in the /api directory
+
+## Common Vercel Issues and Solutions
+
+### 404 Errors on Routes
+
+If you get 404 errors when navigating to routes:
+
+1. Check that vercel.json has the correct rewrite configuration:
+   ```json
+   {
+     "rewrites": [
+       {
+         "source": "/(.*)",
+         "destination": "/"
+       }
+     ]
+   }
    ```
 
-## Step 6: Set up Admin Access
+2. Ensure the rewrite rule is in place for SPA routing
 
-### 6.1 Create Admin User
-1. In your Supabase dashboard, go to Table Editor
-2. Create a new table called `admin_users`
-3. Add an admin user with email `admin@restaurantbot.com` and a secure password
+### Environment Variables Not Loading
 
-## Step 7: Testing
+If environment variables are not loading:
 
-### 7.1 Test Restaurant Signup
-1. Visit your deployed frontend
-2. Go to the signup page
-3. Create a test restaurant account
-4. Verify email (if configured)
+1. Verify they are set in Vercel project settings
+2. Ensure they are prefixed with `VITE_` for client-side access
+3. Redeploy after adding environment variables
 
-### 7.2 Test Payment Integration
-1. Go to the billing page
-2. Select a subscription plan
-3. Complete a test payment using Stripe's test cards
+### Large Bundle Size Warnings
 
-### 7.3 Test Telegram Bot
-1. Create a Telegram bot for your restaurant
-2. Test the bot functionality
+The application may show warnings about large bundle sizes. This is normal for feature-rich applications. To reduce bundle size:
 
-## Step 8: Production Checklist
-
-- [ ] SSL certificate configured
-- [ ] Domain DNS properly configured
-- [ ] Email service configured for transactional emails
-- [ ] Backup strategy implemented
-- [ ] Monitoring and alerting configured
-- [ ] Security audit completed
-- [ ] Performance optimization applied
-- [ ] Analytics and logging configured
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Errors**
-   - Verify Supabase URL and keys are correct
-   - Check that authentication is enabled in Supabase
-
-2. **Payment Processing Issues**
-   - Verify Stripe keys are correct
-   - Check that webhooks are properly configured
-   - Ensure test mode is enabled for development
-
-3. **Telegram Bot Not Responding**
-   - Verify webhook URL is correct
-   - Check that the bot token is valid
-   - Ensure the webhook endpoint is accessible
-
-### Support
-
-For additional help, please:
-1. Check the project documentation
-2. Review the code comments
-3. Open an issue on GitHub
-4. Contact the development team
-
-## Maintenance
-
-### Regular Tasks
-- Monitor payment processing
-- Review subscription renewals
-- Check bot performance
-- Update dependencies
-- Review security logs
-
-### Updates
-When deploying updates:
-1. Test in a staging environment first
-2. Backup the database
-3. Deploy frontend changes
-4. Deploy backend changes
-5. Monitor for issues
+1. Use dynamic imports for code splitting
+2. Lazy load components that aren't immediately needed
+3. Optimize images and assets

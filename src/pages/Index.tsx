@@ -1,8 +1,23 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MadeWithDyad } from "@/components/made-with-dyad";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  // Test Supabase connection
+  const testSupabase = async () => {
+    try {
+      const { data, error } = await supabase.from('restaurants').select('count').single();
+      if (error) {
+        console.log('Supabase connection error:', error);
+      } else {
+        console.log('Supabase connection successful:', data);
+      }
+    } catch (error) {
+      console.log('Supabase connection failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="text-center mb-8">
@@ -24,8 +39,11 @@ const Index = () => {
           </Button>
         </div>
         
-        {/* Test link for debugging - remove in production */}
+        {/* Test button for debugging - remove in production */}
         <div className="mt-4">
+          <Button onClick={testSupabase} variant="link" size="sm">
+            Test Supabase Connection
+          </Button>
           <Button asChild variant="link" size="sm">
             <Link to="/auth/test">
               Connection Test (Debug)

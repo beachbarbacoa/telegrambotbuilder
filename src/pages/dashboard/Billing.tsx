@@ -8,16 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { showError, showSuccess } from "@/utils/toast";
-import { loadStripe } from "@stripe/stripe-js";
-
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || "");
 
 const Billing = () => {
   const { restaurant } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   // Plan options
   const planOptions = [
@@ -63,61 +58,25 @@ const Billing = () => {
     setLoading(true);
     
     try {
-      // If switching to a paid plan, redirect to Stripe checkout
-      if (selectedPlan !== "pay_per_order" && selectedPlan.startsWith("monthly_")) {
-        await redirectToCheckout(selectedPlan);
-      } else {
-        // For pay-per-order, update directly
-        const { error } = await supabase
-          .from('restaurants')
-          .update({
-            subscription_plan: selectedPlan,
-            order_limit: planOptions.find(p => p.id === selectedPlan)?.orderLimit,
-          })
-          .eq('id', restaurant.id);
+      // For testing purposes, update directly without Stripe
+      const { error } = await supabase
+        .from('restaurants')
+        .update({
+          subscription_plan: selectedPlan,
+          order_limit: planOptions.find(p => p.id === selectedPlan)?.orderLimit,
+        })
+        .eq('id', restaurant.id);
 
-        if (error) {
-          showError("Failed to update subscription. Please try again.");
-          return;
-        }
-
-        showSuccess("Subscription updated successfully!");
+      if (error) {
+        showError("Failed to update subscription. Please try again.");
+        return;
       }
+
+      showSuccess("Subscription updated successfully!");
     } catch (error) {
       showError("Failed to update subscription. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const redirectToCheckout = async (planId: string) => {
-    try {
-      setIsProcessing(true);
-      
-      // Create Stripe checkout session
-      const response = await fetch("/api/stripe-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          restaurantId: restaurant?.id,
-          planId,
-        }),
-      });
-
-      const { sessionId } = await response.json();
-      
-      // Redirect to Stripe checkout
-      const stripe = await stripePromise;
-      if (stripe && sessionId) {
-        // Redirect using window.location
-        window.location.href = `https://checkout.stripe.com/pay/${sessionId}`;
-      }
-    } catch (error) {
-      showError("Failed to initiate checkout. Please try again.");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -188,10 +147,9 @@ const Billing = () => {
           <div className="mt-6">
             <Button 
               onClick={handlePlanChange}
-              disabled={!selectedPlan || selectedPlan === restaurant?.subscription_plan || loading || isProcessing}
+              disabled={!selectedPlan || selectedPlan === restaurant?.subscription_plan || loading}
             >
-              {isProcessing ? "Processing..." : 
-               loading ? "Updating..." : 
+              {loading ? "Updating..." : 
                selectedPlan !== restaurant?.subscription_plan ? "Update Subscription" : "Current Plan"}
             </Button>
           </div>
