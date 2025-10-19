@@ -1,112 +1,75 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const TestSupabase = () => {
-  const [connectionStatus, setConnectionStatus] = useState("Checking...");
-  const [error, setError] = useState("");
-  const [tableStatus, setTableStatus] = useState("Checking...");
-  const [tableError, setTableError] = useState("");
-  const navigate = useNavigate();
+  const [testResult, setTestResult] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const testConnection = async () => {
+    const testSupabase = async () => {
       try {
-        // Try to get the Supabase URL from environment variables
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        console.log("Testing Supabase connection...");
         
-        if (!supabaseUrl) {
-          setConnectionStatus("Failed");
-          setError("VITE_SUPABASE_URL environment variable is not set");
-          return;
+        // Test basic connection
+        const { data, error } = await supabase
+          .from('restaurants')
+          .select('count', { count: 'exact', head: true });
+        
+        if (error) {
+          console.error("Supabase Error:", error);
+          setTestResult(`Supabase Error: ${error.message}`);
+        } else {
+          console.log("Supabase Success:", data);
+          setTestResult(`Supabase Connection Successful. Row count: ${data?.length || 0}`);
         }
-        
-        setConnectionStatus("Success");
-        
-        // Test if restaurants table exists and has correct structure
-        try {
-          const { data, error } = await supabase
-            .from('restaurants')
-            .select('id')
-            .limit(1);
-            
-          if (error) {
-            setTableStatus("Failed");
-            setTableError(`Database error: ${error.message}`);
-          } else {
-            setTableStatus("Success");
-          }
-        } catch (tableErr) {
-          setTableStatus("Failed");
-          setTableError(`Table error: ${tableErr.message}`);
-        }
-      } catch (err) {
-        setConnectionStatus("Failed");
-        setError(`Connection error: ${err.message}`);
+      } catch (error) {
+        console.error("Unexpected Error:", error);
+        setTestResult(`Unexpected Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } finally {
+        setLoading(false);
       }
     };
 
-    testConnection();
+    testSupabase();
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Supabase Connection Test</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-medium">Connection Status:</h3>
-              <p className={connectionStatus === "Success" ? "text-green-600" : "text-red-600"}>
-                {connectionStatus}
-              </p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
+        <h1 className="text-3xl font-bold mb-6 text-center">Supabase Test</h1>
+        
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Connection Test</h2>
+          {loading ? (
+            <p className="text-gray-600">Testing connection...</p>
+          ) : (
+            <div className="p-4 bg-gray-50 rounded">
+              <p className="font-mono text-sm">{testResult}</p>
             </div>
-            
-            {error && (
-              <div>
-                <h3 className="font-medium">Error:</h3>
-                <p className="text-red-600">{error}</p>
-              </div>
-            )}
-            
-            <div>
-              <h3 className="font-medium">Restaurants Table Status:</h3>
-              <p className={tableStatus === "Success" ? "text-green-600" : "text-red-600"}>
-                {tableStatus}
-              </p>
-            </div>
-            
-            {tableError && (
-              <div>
-                <h3 className="font-medium">Table Error:</h3>
-                <p className="text-red-600">{tableError}</p>
-              </div>
-            )}
-            
-            <Button 
-              className="w-full" 
-              onClick={() => navigate("/auth/signup")}
-              disabled={connectionStatus !== "Success"}
-            >
-              Go to Signup
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => navigate("/")}
-            >
-              Back to Home
-            </Button>
+          )}
+        </div>
+        
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Environment Variables</h2>
+          <div className="p-4 bg-gray-50 rounded">
+            <p className="font-mono text-sm">
+              VITE_SUPABASE_URL: {import.meta.env.VITE_SUPABASE_URL ? "Set" : "Not Set"}
+            </p>
+            <p className="font-mono text-sm">
+              VITE_SUPABASE_ANON_KEY: {import.meta.env.VITE_SUPABASE_ANON_KEY ? "Set" : "Not Set"}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        
+        <div className="text-center">
+          <a 
+            href="/" 
+            className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors"
+          >
+            Return to Home
+          </a>
+        </div>
+      </div>
     </div>
   );
 };
