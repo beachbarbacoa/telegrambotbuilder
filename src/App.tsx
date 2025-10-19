@@ -27,54 +27,59 @@ import { AuthProvider } from "@/context/AuthContext";
 import { AdminAuthProvider } from "@/context/AdminAuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
+console.log("App: Initializing");
+
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <AdminAuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/test" element={<TestFrontend />} />
-              <Route path="/auth/signup" element={<Signup />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/test" element={<TestSupabase />} />
-              
-              {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/*" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="restaurants" element={<AdminRestaurants />} />
-                <Route path="orders" element={<AdminOrders />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route>
-              
-              {/* Protected Dashboard Routes */}
-              <Route path="/dashboard/*" element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Dashboard />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="billing" element={<Billing />} />
-                <Route path="menu" element={<Menu />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="payments" element={<Payments />} />
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AdminAuthProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  console.log("App: Rendering");
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <AdminAuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/test" element={<TestFrontend />} />
+                <Route path="/auth/signup" element={<Signup />} />
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/auth/test" element={<TestSupabase />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin/*" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="restaurants" element={<AdminRestaurants />} />
+                  <Route path="orders" element={<AdminOrders />} />
+                  <Route path="analytics" element={<AdminAnalytics />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
+                
+                {/* Protected Dashboard Routes */}
+                <Route path="/dashboard/*" element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Dashboard />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="billing" element={<Billing />} />
+                  <Route path="menu" element={<Menu />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="payments" element={<Payments />} />
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AdminAuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
