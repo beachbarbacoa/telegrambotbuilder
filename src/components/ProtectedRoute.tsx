@@ -9,12 +9,15 @@ const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("ProtectedRoute: Checking authentication", { user, isLoading });
     if (!isLoading && !user) {
+      console.log("ProtectedRoute: User not authenticated, redirecting to login");
       navigate("/auth/login");
     }
   }, [user, isLoading, navigate]);
 
   if (isLoading) {
+    console.log("ProtectedRoute: Still loading");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>
@@ -22,6 +25,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  console.log("ProtectedRoute: Rendering children", { user: !!user });
   return user ? children : null;
 };
 
