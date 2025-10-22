@@ -27,6 +27,7 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Signup form submitted", formData);
     setLoading(true);
     
     try {
@@ -36,13 +37,17 @@ const Signup = () => {
         password: formData.password,
       });
 
+      console.log("Supabase signup response", { data, error });
+
       if (error) {
+        console.error("Signup error:", error);
         showError(`Signup error: ${error.message}`);
         return;
       }
 
       // Create restaurant profile
       if (data.user) {
+        console.log("Creating restaurant profile for user", data.user.id);
         const { error: profileError } = await supabase
           .from('restaurants')
           .insert({

@@ -17,15 +17,19 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Login form submitted", { email, password });
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
+      console.log("Supabase login response", { data, error });
+
       if (error) {
+        console.error("Login error:", error);
         showError(error.message);
         return;
       }
@@ -33,6 +37,7 @@ const Login = () => {
       showSuccess("Logged in successfully!");
       navigate("/dashboard");
     } catch (error) {
+      console.error("Login failed:", error);
       showError("Login failed. Please try again");
     } finally {
       setLoading(false);
