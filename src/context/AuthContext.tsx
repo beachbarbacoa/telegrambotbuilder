@@ -35,19 +35,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("AuthProvider: Initializing");
-    
-    // Simple initialization without Supabase calls
-    setIsLoading(false);
-    console.log("AuthProvider: Initialization complete");
+    // Check current session on load
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      
+      // If user is authenticated, fetch restaurant profile
+      if (session?.user) {
+        await fetchRestaurantProfile(session.user.id);
+      }
+      
+      setIsLoading(false);
+    };
+
+    const fetchRestaurantProfile = async (userId: string) => {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (!error && data) {
+        setRestaurant(data);
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user || null);
+        
+        // Fetch restaurant profile when user logs in
+        if (session?.user && event === 'SIGNED_IN') {
+          await fetchRestaurantProfile(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          setRestaurant(null);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signOut = async () => {
-    console.log("AuthProvider: Signing out");
+    await supabase.auth.signOut();
     setRestaurant(null);
   };
-
-  console.log("AuthProvider: Rendering with state", { user, restaurant, isLoading });
 
   return (
     <AuthContext.Provider value={{ user, restaurant, isLoading, signOut }}>
